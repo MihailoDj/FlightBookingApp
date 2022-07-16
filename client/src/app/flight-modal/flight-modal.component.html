@@ -1,0 +1,21 @@
+<div class="modal-header">
+  <h4 class="modal-title pull-left">{{ title }}</h4>
+  <button
+    type="button"
+    class="btn-close close pull-right"
+    aria-label="Close"
+    (click)="bsModalRef.hide()"
+  >
+    <span aria-hidden="true" class="visually-hidden">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <button
+  class="btn d-inline m-1"
+  *ngFor="let seatNumber of [].constructor(flight.totalSeats); let i = index"
+  [ngClass]="seatAvailable(i) ? 'btn-outline-primary' : 'btn-danger disabled'"
+  (click)="makeReservation(i)"
+  >
+    {{ i }}
+  </button>
+</div>

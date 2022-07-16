@@ -1,0 +1,192 @@
+<app-user-controls></app-user-controls>
+<div id="main" class="d-flex flex-column min-vh-100 align-items-center">
+  <tabset class="mt-3 w-75">
+    <tab heading="View flights" id="viewFlightsTab">
+      <main class="w-100 m-auto text-center mt-3">
+        <h3 class="text-start">Browse flights</h3>
+        <table class="table table-striped mt-3 table-hover w-100">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">From</th>
+              <th scope="col">To</th>
+              <th scope="col">Date</th>
+              <th scope="col">Total seats</th>
+              <th scope="col">Remaining seats</th>
+              <th scope="col">Connecting flights</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let flight of flights"
+              [ngClass]="{ 'bg-danger': flight.remainingSeats < 5 }"
+            >
+              <th scope="row">{{ flight.id }}</th>
+              <th scope="row">{{ flight.departureCity.name }}</th>
+              <th scope="row">{{ flight.arrivalCity.name }}</th>
+              <th scope="row">{{ flight.dateOfFlight | date: "short" }}</th>
+              <th scope="row">{{ flight.totalSeats }}</th>
+              <th scope="row">{{ flight.remainingSeats }}</th>
+              <th scope="row">{{ flight.connectingFlights }}</th>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+    </tab>
+    <tab heading="Add a flight" id="addFlightTab">
+      <main class="form-signin w-100 m-auto text-center mt-3">
+        <h3 class="text-start">Create a new flight</h3>
+        <form
+          #flightForm="ngForm"
+          (ngSubmit)="addFlight()"
+          autocomplete="off"
+          class="row gx-3 gy-3 mt-3 align-items-center"
+        >
+          <div class="col-sm-4 text-start">
+            <p class="m-auto mb-1">From:</p>
+            <select
+              class="form-select"
+              [(ngModel)]="model.departureCityId"
+              name="depCityDropdown"
+            >
+              <option [value]="city.id" *ngFor="let city of cities">
+                {{ city.name }}
+              </option>
+            </select>
+          </div>
+          <div class="col-sm-4 text-start">
+            <p class="m-auto mb-1">To:</p>
+            <select
+              class="form-select"
+              [(ngModel)]="model.arrivalCityId"
+              name="arrCityDropdown"
+            >
+              <option [value]="city.id" *ngFor="let city of cities">
+                {{ city.name }}
+              </option>
+            </select>
+          </div>
+          <div class="col-sm-4 text-start form-group">
+            <p class="m-auto mb-1">Date:</p>
+            <input
+              type="text"
+              class="form-control"
+              name="dateOfFlight"
+              [(ngModel)]="model.dateOfFlight"
+              #dp="bsDatepicker"
+              bsDatepicker
+              [bsValue]="bsValue"
+              [minDate]="minDate"
+              [bsConfig]="{
+                withTimepicker: true,
+                dateInputFormat: 'MMM Do YYYY, h:mm a'
+              }"
+            />
+          </div>
+          <div class="col-sm-6 form-floating">
+            <input
+              name="numberOfSeats"
+              type="number"
+              [(ngModel)]="model.totalSeats"
+              class="form-control"
+              placeholder="Number of seats"
+              required
+            />
+            <label for="floatingInput">Number of seats</label>
+          </div>
+          <div class="col-sm-6 form-floating">
+            <input
+              name="connectingFlights"
+              type="number"
+              [(ngModel)]="model.connectingFlights"
+              class="form-control"
+              placeholder="Number of connecting flights"
+              required
+            />
+            <label for="floatingInput">Number of connecting flights</label>
+          </div>
+
+          <button
+            class="w-25 btn btn-lg btn-primary m-auto mt-5 text-center"
+            type="submit"
+          >
+            Add
+          </button>
+
+          <div class="alert alert-danger mt-3" *ngIf="errorMessage">
+            {{ errorMessage }}
+          </div>
+        </form>
+      </main>
+    </tab>
+    <tab heading="View reservations" id="viewReservationsTab">
+      <main class="w-100 m-auto text-center mt-3">
+        <h3 class="text-start">View pending reservations</h3>
+        <table class="table table-striped mt-3 table-hover w-100">
+          <thead>
+            <tr>
+              <th scope="col">Flight ID</th>
+              <th scope="col">User</th>
+              <th scope="col">Date</th>
+              <th scope="col">Seat number</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let reservation of reservations">
+              <th scope="row">{{ reservation.flight.id }}</th>
+              <th scope="row">{{ reservation.user.userName }}</th>
+              <th scope="row">
+                {{ reservation.flight.dateOfFlight | date: "short" }}
+              </th>
+              <th scope="row">{{ reservation.seatNumber }}</th>
+              <th
+                scope="row"
+                [ngClass]="{
+                  'text-success': reservation.status === 2,
+                  'text-danger': reservation.status === 3
+                }"
+              >
+                {{
+                  reservation.status === 1
+                    ? "Pending"
+                    : reservation.status === 2
+                    ? "Accepted"
+                    : "Rejected"
+                }}
+              </th>
+              <th>
+                <button
+                  *ngIf="reservation.status === 1"
+                  class="btn btn-primary"
+                  (click)="
+                    acceptReservation(
+                      reservation.flight.id,
+                      reservation.user.id
+                    )
+                  "
+                >
+                  Accept
+                </button>
+              </th>
+              <th>
+                <button
+                  *ngIf="reservation.status === 1"
+                  class="btn btn-danger"
+                  (click)="
+                    rejectReservation(
+                      reservation.flight.id,
+                      reservation.user.id
+                    )
+                  "
+                >
+                  Reject
+                </button>
+              </th>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+    </tab>
+  </tabset>
+</div>
